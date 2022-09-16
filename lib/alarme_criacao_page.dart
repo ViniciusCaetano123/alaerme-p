@@ -1,3 +1,4 @@
+import 'package:alarme_notificacao/models/AlarmeProvider.dart';
 import 'package:alarme_notificacao/models/Semana.dart';
 import 'package:alarme_notificacao/store/alarme.store.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -5,7 +6,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
-
+import 'package:sqflite/sqflite.dart';
+import 'models/Alarme.dart';
+import 'services/DataBase.dart';
 import 'componentes/alarme_criacao/lista_minutos_horas.dart';
 
 final store = AlarmeStore();
@@ -20,27 +23,49 @@ class AlarmeCriacaoPage extends StatefulWidget {
 class _AlarmeCriacaoPage extends State<AlarmeCriacaoPage> {
   DateTime _dateTime = DateTime.now();
 
+  Future<int> _addItem() async {
+    int id = 0;
+    await AlarmeProvider.createAlarme(
+      'Alarme 1',
+      store.hora,
+      store.minuto,
+      _repeat[0].isSelect ? 1 : 0,
+      _repeat[1].isSelect ? 1 : 0,
+      _repeat[2].isSelect ? 1 : 0,
+      _repeat[3].isSelect ? 1 : 0,
+      _repeat[4].isSelect ? 1 : 0,
+      _repeat[5].isSelect ? 1 : 0,
+      _repeat[6].isSelect ? 1 : 0,
+    ).then((value) {
+      id = value;
+    });
+    return id;
+  }
+
   final _repeat = [
-    Semana('D', false, 1),
-    Semana('S', false, 2),
-    Semana('T', false, 3),
+    Semana('S', false, 1),
+    Semana('T', false, 2),
+    Semana('Q', false, 3),
     Semana('Q', false, 4),
-    Semana('Q', false, 5),
+    Semana('S', false, 5),
     Semana('S', false, 6),
-    Semana('S', false, 7)
+    Semana('D', false, 7),
   ];
   void criarAlarme() async {
-    print('vind');
+    int id = await _addItem();
+    print(id);
+    final lista = AlarmeProvider.getItems();
+    //store._journals =
     String localTimeZone =
         await AwesomeNotifications().getLocalTimeZoneIdentifier();
     print(localTimeZone);
-    _repeat.forEach((e) => {
+    /* _repeat.forEach((e) => {
           print(e),
           if (e.isSelect)
             {
               AwesomeNotifications().createNotification(
                 content: NotificationContent(
-                    id: 10,
+                    id: id + e.weekday,
                     notificationLayout: NotificationLayout.BigText,
                     channelKey: 'basic_channel',
                     title: 'Simple Notification',
@@ -62,7 +87,7 @@ class _AlarmeCriacaoPage extends State<AlarmeCriacaoPage> {
                 ),
               )
             }
-        });
+        });*/
   }
 
   @override
@@ -96,7 +121,7 @@ class _AlarmeCriacaoPage extends State<AlarmeCriacaoPage> {
                   child: Column(
                     children: [
                       Container(height: 200, child: ListaMinutosHoras()),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 50),
                       Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -151,7 +176,9 @@ class _AlarmeCriacaoPage extends State<AlarmeCriacaoPage> {
                             ),
                           ),
                           ElevatedButton(
-                              onPressed: criarAlarme, child: Text('Salvar'))
+                              style: ButtonStyle(),
+                              onPressed: criarAlarme,
+                              child: Text('Salvar'))
                         ],
                       )
                     ],

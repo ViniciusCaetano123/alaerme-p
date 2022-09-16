@@ -1,5 +1,7 @@
 import 'dart:isolate';
 import 'package:alarme_notificacao/alarme_criacao_page.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'MyOverlayWindow.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
@@ -17,7 +19,8 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+
+import 'models/AlarmeProvider.dart';
 import 'tela.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -89,16 +92,13 @@ class LocalNotificationService {
   }
 
   void onSelectNotification(String? payload) {
-    //Navigator.pushNamed('second');
     navigatorKey.currentState?.pushNamed('/login');
   }
 }
 
 Future<void> playLocalAsset() async {
   final player = AudioPlayer();
-//
 
-// If file located in assets folder like assets/sounds/note01.wave"
   await player.play(AssetSource('audios/playLocalAsset.mp3'));
 }
 
@@ -110,8 +110,6 @@ void callBackDis() async {
     return Future.value(false);
   });
 }
-
-void testeHello() {}
 
 void printHello() async {
   AwesomeNotifications().initialize(
@@ -220,10 +218,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const MyHomePage(title: 'Flutter Demo Home aaa'),
-      routes: {
-        //"/my-overlay-window": (_) => _MyWidgetState(),
-        //'/second': (context) => const MyWidget(),
-      },
     );
   }
 }
@@ -238,17 +232,25 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List<Map<String, dynamic>> _alarmes = [];
+
+  /* void _refreshJournals() async {
+    final data = await AlarmeProvider.();
+    setState(() {
+      _alarmes = data;
+    });
+  }*/
+
   int _counter = 0;
-  LocalNotificationService flutteNotification = LocalNotificationService();
+
+  void _refreshJournals() async {
+    final da = await AlarmeProvider.getItems();
+  }
+
   @override
   void initState() {
-    getPermission();
+    _refreshJournals();
 
-    AwesomeNotifications().displayedStream.listen((event) {
-      print('mostrando');
-      // FlutterRingtonePlayer.play(fromAsset: "assets/audios/teste.mp3");
-      // playLocalAsset();
-    });
     AwesomeNotifications()
         .actionStream
         .listen((ReceivedNotification receivedNotification) {
@@ -259,14 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
           (route) => route.isFirst);*/
     });
 
-    final int helloAlarmID = 0;
-    flutteNotification.initialize();
-
     super.initState();
-  }
-
-  getPermission() async {
-    await SystemAlertWindow.requestPermissions;
   }
 
   void _incrementCounter() {
@@ -274,6 +269,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+
+  // Insert a new journal to the database
 
   TextEditingController txtControler = TextEditingController();
   @override
@@ -335,18 +332,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         ElevatedButton(
                             onPressed: () async {
                               final int helloAlarmID = 0;
-                              await AndroidAlarmManager.oneShot(
-                                  const Duration(seconds: 10),
-                                  helloAlarmID,
-                                  testeHello,
-                                  exact: true,
-                                  wakeup: true);
-                            },
-                            child: Text(
-                                'Alamar android plus one sht teste heelo')),
-                        ElevatedButton(
-                            onPressed: () async {
-                              final int helloAlarmID = 0;
                               await AndroidAlarmManager.periodic(
                                   const Duration(minutes: 2),
                                   helloAlarmID,
@@ -365,40 +350,15 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             Container(
+              child: Text('5'),
+            ),
+            Container(
               width: double.infinity,
               height: 400,
               color: Colors.white,
-              child: Column(
-                children: [
-                  ElevatedButton(
-                      onPressed: () async {
-                        var uniqueName = DateTime.now().second.toString();
-                        Workmanager().registerPeriodicTask('teste', task,
-                            initialDelay: Duration(minutes: 15),
-                            existingWorkPolicy: ExistingWorkPolicy.append);
-                      },
-                      child: Text(' Work manager registerPeriodicTask')),
-                  ElevatedButton(
-                      onPressed: () {
-                        var uniqueName = DateTime.now().second.toString();
-                        Workmanager().registerOneOffTask('teste', task,
-                            initialDelay: Duration(seconds: 35),
-                            existingWorkPolicy: ExistingWorkPolicy.append);
-                      },
-                      child: Text(' Work manager registerOneOffTask')),
-                  ElevatedButton(
-                      onPressed: () async {
-                        var uniqueName = DateTime.now().second.toString();
-                        await Workmanager().cancelByUniqueName('teste');
-                      },
-                      child: Text('cancel Work manager')),
-                  ElevatedButton(
-                      onPressed: () async {
-                        flutteNotification.showNotification(
-                            id: 2, title: 'dasddss', body: 'dasasa');
-                      },
-                      child: Text('Show Notification Local')),
-                ],
+              child: ListView.builder(
+                itemCount: 5,
+                itemBuilder: (context, index) => Container(child: Text('ok')),
               ),
             )
           ],

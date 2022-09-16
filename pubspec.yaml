@@ -27,6 +27,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  sqflite: ^2.0.3+1
+  path: any
   android_alarm_manager_plus: ^2.0.6+1  
   just_audio: any # substitute version number
   just_audio_background: any 
@@ -39,7 +41,6 @@ dependencies:
   flutter_local_notifications: ^9.9.1
   timezone: ^0.8.0
   flutter_foreground_task: ^3.8.2
-  flutter_ringtone_player: ^3.2.0
   system_alert_window: ^1.1.2  
   share_plus: ^4.1.0
   flutter_platform_alert: ^0.3.0
